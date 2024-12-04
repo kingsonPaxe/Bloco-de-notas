@@ -1,39 +1,31 @@
 package com.example.blocodenotas.viewModel
 
-import Anotacao
-import AnotacaoDao
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
+import com.example.blocodenotas.roomDatabase.Anotacao
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import javax.inject.Inject
 
-class AnotacoesViewModel(private val dao: AnotacaoDao) : ViewModel() {
-    private val _anotacoes = MutableStateFlow<List<Anotacao>>(emptyList())
-    val anotacoes: StateFlow<List<Anotacao>> = _anotacoes
+@HiltViewModel
+class HomePageViewModel @Inject constructor(
+    private val dao: com.example.blocodenotas.roomDatabase.AnotacaoDao
+) : ViewModel() {
 
-    init {
-        fetchAnotacoes()
-    }
+    val anotacoes = dao.getAllAnotacoes()
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000L),
+            emptyList()
+        )
 
-    private fun fetchAnotacoes() {
-        viewModelScope.launch(Dispatchers.IO) {
-            _anotacoes.value = dao.getAllAnotacoes()
-        }
-    }
-
-    fun addAnotacao(anotacao: Anotacao) {
-        viewModelScope.launch(Dispatchers.IO) {
-            dao.insertAnotacao(anotacao)
-            fetchAnotacoes()
-        }
-    }
-
-    fun deleteAnotacao(anotacao: Anotacao) {
-        viewModelScope.launch(Dispatchers.IO) {
+    fun eliminarAnotacao(anotacao: Anotacao){
+        viewModelScope.launch {
             dao.deleteAnotacao(anotacao)
-            fetchAnotacoes()
         }
     }
+
+
 }

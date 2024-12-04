@@ -18,7 +18,7 @@ import com.example.blocodenotas.ui.theme.white
 fun botao(
     onClick:() -> Unit,
     modifier: Modifier,
-    texto:String
+    texto: String
 ){
     Button(
         onClick,

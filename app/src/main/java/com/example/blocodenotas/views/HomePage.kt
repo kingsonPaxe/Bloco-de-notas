@@ -2,11 +2,9 @@ package com.example.blocodenotas.views
 
 import AnotacoesItem
 import android.annotation.SuppressLint
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -19,23 +17,23 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import com.example.blocodenotas.R
-import com.example.blocodenotas.model.Anotacoes
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.blocodenotas.ui.theme.ShapeFloatingActionButton
-import com.example.blocodenotas.ui.theme.blue
 import com.example.blocodenotas.ui.theme.white
+import com.example.blocodenotas.viewModel.HomePageViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomePage(
-    navController: NavController
-){
+    viewModel: HomePageViewModel = hiltViewModel(),
+    adicionarNotacao: () -> Unit
+) {
+    val anotacoes = viewModel.anotacoes.collectAsStateWithLifecycle().value
+
     Scaffold(
         containerColor = Color.White,
         topBar = {
@@ -58,9 +56,7 @@ fun HomePage(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {
-                    navController.navigate("InsertInfo")
-                },
+                onClick = adicionarNotacao,
                 containerColor = Color.Blue,
                 contentColor = Color.White,
                 shape = ShapeFloatingActionButton.large
@@ -70,45 +66,16 @@ fun HomePage(
         }
 
 
-    ) {paddingValues ->
+    ) { paddingValues ->
         // Aqui onde vamos configurar a Lista de anotacoes...
-        val listaAnotacoes: MutableList<Anotacoes> = mutableListOf(
-            Anotacoes(
-                Titulo = "O que é Kotlin?",
-                descricao = "Kotlin é uma linguagem de programação moderna e concisa."
-            ),
-            Anotacoes(
-                Titulo = "O que é a vida?",
-                descricao = "A vida é o que acontece enquanto fazemos planos."
-            ),
-            Anotacoes(
-                Titulo = "Nota 3",
-                descricao = "Descrição da nota 3."
-            ),
-
-            Anotacoes(
-                Titulo = "Nota 3",
-                descricao = "Descrição da nota 3."
-            ),
-
-            Anotacoes(
-                Titulo = "Nota 3",
-                descricao = "Descrição da nota 3."
-            ),
-
-            Anotacoes(
-                Titulo = "Nota 3",
-                descricao = "Descrição da nota 3."
-            ),
-
-            )
-
         LazyColumn(
             modifier = Modifier.padding(paddingValues)
-        ){
-            itemsIndexed(listaAnotacoes){
-                    position, _ ->
-                AnotacoesItem(position,listaAnotacoes)
+        ) {
+            items(anotacoes) { anotacao ->
+                    AnotacoesItem(
+                        anotacao = anotacao,
+                        eliminar = { viewModel.eliminarAnotacao(it) }
+                    )
             }
         }
     }
